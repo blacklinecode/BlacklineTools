@@ -51,3 +51,4 @@ Execute o script com os argumentos nomeados (`--text` é obrigatório, `--senten
 
 ```bash
 python3 summarizer.py --text "Seu relatório longo e complexo vai aqui, envolto em aspas para garantir que o terminal leia tudo corretamente."
+git 
