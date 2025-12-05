@@ -1,5 +1,7 @@
 # summarizer.py - Ferramenta de Resumo Blackline Code (PLN)
 
+import sys 
+import argparse # Módulo profissional para interfaces de linha de comando
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -23,15 +25,12 @@ def summarize_text(text, num_sentences=3):
     
     # Tentativa de carregar stopwords em português
     try:
-        # Usa o set de stopwords (palavras comuns que não contam)
         stop_words = set(stopwords.words('portuguese'))
     except LookupError:
-        # Se as stopwords não estiverem baixadas, usa um set vazio
         stop_words = set()
     
     for word in word_tokenize(text.lower()):
         if word.isalnum() and word not in stop_words:
-            # Conta a frequência da palavra
             word_freq[word] = word_freq.get(word, 0) + 1
     
     # 3. Pontuação das Frases: A frase ganha pontos se contiver palavras frequentes.
@@ -39,34 +38,45 @@ def summarize_text(text, num_sentences=3):
     for sentence in sentences:
         for word, freq in word_freq.items():
             if word in sentence.lower():
-                # Adiciona a frequência da palavra na pontuação total da frase
                 sentence_scores[sentence] = sentence_scores.get(sentence, 0) + freq
 
     # 4. Seleciona as N frases com maior pontuação
-    # O "sorted" é o que garante que as frases mais importantes venham primeiro.
     summary_sentences = sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)[:num_sentences]
     
     # Junta as frases selecionadas no resumo final
     return ' '.join([sentence for sentence, score in summary_sentences]).strip()
 
-# --- Bloco de Teste para o Desenvolvedor ---
+# --- Bloco de Execução Profissional com Argumentos Nomeados (argparse) ---
 
 if __name__ == "__main__":
     
-    # Texto de exemplo (com cara de projeto ou reunião)
-    input_text = """
-    A reunião de hoje focou na melhoria da performance da API. 
-    A equipe de desenvolvimento propôs uma migração do banco de dados 
-    para um serviço mais rápido. Essa mudança, apesar de custosa no curto prazo, 
-    garantirá uma latência de menos de 100ms nas principais requisições, 
-    cumprindo a meta de otimização de performance do Q4. 
-    Será necessário automatizar o processo de migração para evitar erros manuais.
-    """
+    parser = argparse.ArgumentParser(
+        description='Text Summarizer Tool (Blackline Code) - Generates a precise summary of input text.',
+        epilog='Use aspas para envolver o texto de entrada.'
+    )
     
-    # Gera um resumo de 2 frases
-    resumo = summarize_text(input_text, num_sentences=2)
+    # Argumento OBRIGATÓRIO: O texto a ser resumido
+    parser.add_argument(
+        '--text', 
+        type=str, 
+        required=True, 
+        help='The text input to be summarized (enclose in quotes).'
+    )
+    
+    # Argumento OPCIONAL: O número de frases
+    parser.add_argument(
+        '--sentences', 
+        type=int, 
+        default=2, 
+        help='The desired number of sentences for the summary (default is 2).'
+    )
+    
+    args = parser.parse_args()
+    
+    # Gera o resumo
+    resumo = summarize_text(args.text, num_sentences=args.sentences)
     
     print("====================================")
-    print("RESUMO BLACKLINE CODE (2 Frases):")
+    print(f"RESUMO BLACKLINE CODE ({args.sentences} Frases):")
     print(resumo)
     print("====================================")
